@@ -29,6 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     abrir.set_low()?;
 
     let mut estado_porton: u8 = 0;
+    let mut estado_porton_ant: u8 = 1;
     let mut tiempo: u8 = 0;
 
     log::info!("Porton listo");
@@ -36,6 +37,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         if estado_porton == 0 {
             // estado Cerrado
+            if estado_porton != estado_porton_ant {
+                log::info!("Estado Cerrado");
+                estado_porton_ant = estado_porton;
+            }
             abrir.set_low()?;
             cerrar.set_low()?;
             luz.set_low()?;
@@ -45,6 +50,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         } else if estado_porton == 1 {
             // estado Abriendo
+            if estado_porton != estado_porton_ant {
+                log::info!("Estado Abriendo");
+                estado_porton_ant = estado_porton;
+            }
             abrir.set_high()?;
             cerrar.set_low()?;
             luz.set_high()?;
@@ -54,9 +63,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         } else if estado_porton == 2 {
             // estado Abierto
+            if estado_porton != estado_porton_ant {
+                log::info!("Estado Abierto");
+                estado_porton_ant = estado_porton;
+            }
             abrir.set_low()?;
-            cerrar.set_high()?;
-            luz.set_high()?;
+            cerrar.set_low()?;
+            luz.set_low()?;
 
             if tiempo < 10 {
                 tiempo = tiempo + 1;
@@ -68,6 +81,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         } else {
             // estado Cerrando
+            if estado_porton != estado_porton_ant {
+                log::info!("Estado Cerrando");
+                estado_porton_ant = estado_porton;
+            }
             abrir.set_low()?;
             cerrar.set_high()?;
             luz.set_high()?;
@@ -78,5 +95,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 estado_porton = 0;
             }
         }
+
+        sleep(Duration::from_millis(50));
     }
 }
